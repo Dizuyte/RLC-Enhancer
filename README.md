@@ -6,7 +6,7 @@ RLC Enhancer (formerly RLC Mod) is a mod for **RL Career Hub** (Rocket League ca
 
 ## Download and install
 
-1. Go to [Releases](../../releases) and download `RLC-Enhancer-v1.2.zip`.
+1. Download `RLC-Enhancer-v1.2.zip` from the [latest release](../../releases/latest).
 2. Right-click the zip > "Extract All...", close RL Career Hub, then double-click `Install RLC Enhancer.bat`.
 3. Start the game with the **RL Career Hub MOD** shortcut on your desktop.
 
