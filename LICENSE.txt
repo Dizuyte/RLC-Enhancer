@@ -1,0 +1,77 @@
+RLC Enhancer - License
+=================
+Copyright (c) 2026 Milan. All rights reserved.
+
+RLC Enhancer is an unofficial mod for RL Career Hub. It is not made, endorsed or
+supported by the RL Career Hub team. RL Career Hub and its code belong to their
+owners and are not included in this package: the installer only adds RLC Enhancer
+to a copy of the game you already have.
+
+The source code of RLC Enhancer is public so that anyone can read and review it.
+"Public" does not mean free to reuse.
+
+You may:
+- read and study the source code;
+- download RLC Enhancer from the official post and install it on your own computer
+  for personal, non-commercial use.
+
+Nobody may, without Milan's prior written permission (this includes the
+RL Career Hub team):
+- copy, reuse or adapt RLC Enhancer or any part of its code, in any other project,
+  mod or product, including RL Career Hub itself;
+- share, re-upload or redistribute RLC Enhancer, original or modified;
+- use RLC Enhancer or its code commercially;
+- remove or change this license or the credits.
+
+Written permission means a written message from Milan (for example on Discord)
+that explicitly says what is allowed.
+
+RLC Enhancer is provided "as is", without any warranty. Back up your saves. The
+author is not responsible for any damage or data loss.
+
+Contact: Milan, on the RL Career Hub Discord.
+
+Third-party part: the files in "files\presets" (installed in
+"Documents\RL Career Hub Mod\presets") are RLCareerProPresets by Matiyo,
+https://github.com/Managone/RLCareerProPresets, under the MIT license
+(Copyright (c) 2026 Matiyo, see LICENSE in that folder). This license does
+not cover them: they stay under their own MIT license.
+
+-------------------------------------------------------------------------------
+
+RLC Enhancer - Licence (traduction francaise)
+========================================
+Copyright (c) 2026 Milan. Tous droits reserves.
+
+RLC Enhancer est un mod non officiel de RL Career Hub. Il n'est ni fait, ni approuve,
+ni supporte par l'equipe de RL Career Hub. RL Career Hub et son code appartiennent
+a leurs proprietaires et ne sont pas inclus : l'installateur ajoute seulement
+RLC Enhancer a une copie du jeu que tu possedes deja.
+
+Le code source de RLC Enhancer est public pour que tout le monde puisse le lire et le
+verifier. "Public" ne veut pas dire libre de reutilisation.
+
+Tu peux :
+- lire et etudier le code source ;
+- telecharger RLC Enhancer depuis le post officiel et l'installer sur ton propre
+  ordinateur, pour un usage personnel et non commercial.
+
+Personne ne peut, sans l'accord ecrit prealable de Milan (equipe de
+RL Career Hub comprise) :
+- copier, reutiliser ou adapter RLC Enhancer ou une partie de son code, dans un autre
+  projet, mod ou produit, y compris RL Career Hub lui-meme ;
+- partager, re-uploader ou redistribuer RLC Enhancer, original ou modifie ;
+- utiliser RLC Enhancer ou son code a des fins commerciales ;
+- retirer ou modifier cette licence ou les credits.
+
+Un accord ecrit, c'est un message ecrit de Milan (par exemple sur Discord) qui
+dit clairement ce qui est autorise.
+
+RLC Enhancer est fourni "tel quel", sans garantie. Sauvegarde tes saves. L'auteur
+n'est pas responsable des dommages ou pertes de donnees.
+
+Partie tierce : les fichiers de "files\presets" (installes dans
+"Documents\RL Career Hub Mod\presets") sont RLCareerProPresets par Matiyo,
+https://github.com/Managone/RLCareerProPresets, sous licence MIT
+(Copyright (c) 2026 Matiyo, voir LICENSE dans ce dossier). Cette licence ne
+les couvre pas : ils restent sous leur propre licence MIT.

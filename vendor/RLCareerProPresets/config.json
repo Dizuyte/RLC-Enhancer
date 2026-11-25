@@ -1,0 +1,9 @@
+{
+  "_help": "enabled: false = mod off, the hub dresses the bots as usual. colors: \"player\" = each pro's own colours (from their replays), \"club\" = club colours like the hub. force: one car for a player every match, e.g. {\"zen\": \"r2\"} (r1 = their usual car, r2 the next one..., h1 = the hub's first preset for them); {} = normal draw. fallback: players with no replay use a real pro car (always the same one) instead of the hub's default car. looks_per_player: how many of a player's presets are in the draw. fix_hub_finishes: shows the paint finish of the hub's own presets.",
+  "enabled": true,
+  "colors": "player",
+  "force": {},
+  "fallback": true,
+  "looks_per_player": 4,
+  "fix_hub_finishes": true
+}

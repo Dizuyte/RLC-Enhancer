@@ -1,0 +1,91 @@
+RLC Enhancer v1.2 pour RL Career Hub - par Milan
+================================================
+
+Compatible : RL Career Hub 0.2.0-beta.33 sur Windows.
+Ton RL Career Hub normal n'est PAS modifie : le mod tourne dans sa propre
+copie du jeu, avec ses propres saves.
+
+NOUVEAU DANS LA v1.2
+- Le mod s'appelle maintenant RLC Enhancer (avant : RLC Mod). Meme mod, meme
+  dossier, tes saves sont conservees.
+- Collab avec RLCareerProPresets de Matiyo : chaque bot d'un match de carriere
+  utilise un des vrais presets de son joueur pro (voiture, sticker, roues,
+  boost, trainee, explosion de but, peintures), tires d'environ 78 000 replays
+  de pros. Installe automatiquement, seulement dans la copie du mod. Reglages :
+  config.json dans "Documents\RL Career Hub Mod\presets".
+- Locaux de bootcamp (Bureau > Business du club, 350 K$) : la semaine avant
+  chaque Major, les Worlds et l'Esports World Cup, les equipes de ta region
+  demandent a les louer. Jusqu'a 50 K$ la semaine (plus l'equipe est haut au
+  classement RLCS, plus elle paie), 3 equipes max par saison. L'offre arrive
+  par mail 6 jours avant le sejour : tu acceptes ou refuses direct dans le mail.
+- Titre en jeu de tes joueurs : ouvre la fiche d'un joueur du club et choisis
+  lequel de ses titres gagnes s'affiche au-dessus de sa voiture (par exemple
+  champion du monde 3v3 ou 2v2). "Auto" garde le choix du jeu.
+- Nouvel onglet Archives facon Liquipedia : chaque saison, chaque region,
+  chaque tournoi, avec classement final, series, classement RLCS et une page
+  par equipe.
+
+NOUVEAU DANS LA v1.1
+- Esports World Cup (3v3) entre le Major 2 et le LCQ, avec son LCQ, les
+  invitations au classement RLCS et le vrai cashprize de 1 000 000 $.
+- Boutique du club et studio de stream (Bureau > Business du club) : de
+  l'argent chaque semaine, et des followers pour le club et les joueurs.
+
+INSTALLATION
+1. Clic droit sur le zip > "Extraire tout...". Ne le lance pas depuis le zip.
+2. Ferme RL Career Hub.
+3. Double-clique sur "Install RLC Enhancer.bat".
+   Si Windows affiche "Windows a protege votre ordinateur" : clique sur
+   "Informations complementaires", puis "Executer quand meme".
+4. L'installateur trouve ton jeu. S'il n'y arrive pas, colle le dossier qui
+   contient "RL Career Hub.exe" (en general C:\Program Files\RL Career Hub)
+   et appuie sur Entree.
+5. Appuie sur Y pour importer tes saves, reglages et bots actuels (conseille),
+   ou N pour repartir de zero. Tes saves normales sont copiees, jamais modifiees.
+6. Attends quelques minutes pendant la copie du jeu (il faut quelques Go
+   libres), jusqu'a "Termine !".
+7. Lance le mod avec le raccourci "RL Career Hub MOD" sur ton bureau.
+   En bas de l'onglet Setup, tu dois voir "RLC Enhancer v1.2 par Milan".
+
+OU SONT LES FICHIERS
+- Jeu modde et saves : Documents\RL Career Hub Mod
+- Saves du mod : Documents\RL Career Hub Mod\rl-career-hub (AppData)\saves
+- Ton jeu normal et ses saves ne bougent pas.
+
+COPIE INDEPENDANTE A LA MAIN (facultatif, l'installateur fait tout ca pour toi)
+1. Copie tout le dossier du jeu (en general C:\Program Files\RL Career Hub) dans
+   Documents\RL Career Hub Mod\RL Career Hub
+   Tu peux laisser "Uninstall RL Career Hub.exe".
+2. Saves : appuie sur Win+R, tape %APPDATA%\rl-career-hub et Entree.
+   Copie ce dossier dans Documents\RL Career Hub Mod\rl-career-hub (AppData)
+   (tu peux laisser Cache, Code Cache et GPUCache). Pour repartir de zero,
+   cree ce dossier vide a la place.
+3. Clic droit sur le "RL Career Hub.exe" copie > Afficher plus d'options >
+   Creer un raccourci. Clic droit sur le raccourci > Proprietes, et a la fin de
+   "Cible", apres un espace, ajoute (avec ton vrai chemin) :
+   --user-data-dir="C:\Users\TOI\Documents\RL Career Hub Mod\rl-career-hub (AppData)"
+4. Lance toujours la copie avec ce raccourci : sans --user-data-dir, la copie
+   utiliserait tes saves normales.
+5. Pour ajouter le mod a cette copie, lance "Install RLC Enhancer.bat" : il reprend
+   le dossier et garde tes donnees.
+- N'utilise jamais "Check for updates" dans la copie, et ne lance pas le jeu
+  normal et la copie en meme temps (ils partagent le plugin BakkesMod).
+
+MISE A JOUR
+- Nouvelle version du mod : dezippe-la et relance "Install RLC Enhancer.bat".
+  Tes saves du mod sont gardees.
+- N'utilise pas "Check for updates" dans le mod : une mise a jour du jeu
+  effacerait le mod. Quand RL Career Hub est mis a jour, attends la mise a jour
+  du mod. L'installateur te previent si ta version du jeu n'est pas compatible.
+
+DESINSTALLATION
+- Supprime le raccourci "RL Career Hub MOD" du bureau et le dossier
+  Documents\RL Career Hub Mod (ca supprime aussi tes saves du mod : copie le
+  dossier "saves" avant si tu veux les garder).
+
+PROBLEME ?
+- Envoie le fichier "hub.log" de Documents\RL Career Hub Mod\rl-career-hub (AppData)
+  a Milan sur le Discord de RL Career Hub, avec une courte explication.
+
+Merci de ne pas re-uploader le mod : partage plutot le lien du post officiel.
+Le code source est public en lecture, mais pas libre de reutilisation : voir LICENSE.txt.

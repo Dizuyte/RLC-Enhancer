@@ -1,0 +1,7 @@
+RLCareerProPresets by Matiyo - https://github.com/Managone/RLCareerProPresets
+MIT license (see LICENSE in this folder). Copyright (c) 2026 Matiyo.
+
+RLC Enhancer installs these files unchanged in "Documents\RL Career Hub Mod\presets"
+and adds the RLCareerLiveries hook to the modded copy's resources\rlbot\start_match.py,
+so every bot of a career match uses one of its pro player's real presets.
+Settings: config.json in that folder (reinstalling keeps it).
