@@ -158,11 +158,12 @@
     const f = currentFacility(state);
     return f ? maintenanceFor(state, facilityPrice(state, f)) : 0;
   }
+  // une avance peut sauter plusieurs jours d'un coup : on paie des qu'on est dans un nouveau mois
   function maintenanceTick(state) {
-    if (String(state.currentDate).slice(8, 10) !== "01") return;
     const month = String(state.currentDate).slice(0, 7);
     const r = rec(state);
-    if (r.maintPaid === month) return;
+    if (!r.maintPaid) { r.maintPaid = month; return; }
+    if (r.maintPaid >= month) return;
     r.maintPaid = month;
     const f = currentFacility(state);
     const amount = currentMaintenance(state);
@@ -281,13 +282,12 @@
 
   // le 1er du mois : mail qui recapitule ce que le club a paye
   function expensesTick(state) {
-    if (String(state.currentDate).slice(8, 10) !== "01") return;
     const month = String(state.currentDate).slice(0, 7);
     const r = rec(state);
-    if (r.mailMonth === month) return;
-    // salaires du jeu de base (mode realisme), payes ce matin
+    if (r.mailMonth && r.mailMonth >= month) return;
+    // salaires du jeu de base (mode realisme), payes le 1er de ce mois
     for (const l of state.ledger || []) {
-      if (l && l.date === state.currentDate && l.kind === "wages" && l.amount < 0 && l.note !== tl("Training coach") && l.note !== tl("Scouts")) spend(state, "wages", "", -l.amount);
+      if (l && String(l.date).slice(0, 7) === month && l.date <= state.currentDate && l.kind === "wages" && l.amount < 0 && l.note !== tl("Training coach") && l.note !== tl("Scouts")) spend(state, "wages", "", -l.amount);
     }
     let from = r.mailFrom;
     if (!from) { const d = new Date(month + "-01T00:00:00Z"); d.setUTCMonth(d.getUTCMonth() - 1); from = d.toISOString().slice(0, 10); }
