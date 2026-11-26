@@ -1483,20 +1483,44 @@
 /* ===== RLC ENHANCER : titre in-game de chaque joueur du club (fiche joueur) ===== */
 (function () {
   function e6(x) { return String(x == null ? "" : x).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  // selecteur facon RL Career+ (Jinxy, MIT) : apercu du scoreboard avec la vraie lueur du titre
+  function glowOf(id, text) {
+    var i = String(id || "").toLowerCase(), t = String(text || "").toLowerCase();
+    if (!t) return "none";
+    if (t.indexOf("world cup") >= 0 || i.indexOf("esl") >= 0 || i.indexOf("crl") >= 0 || i.indexOf("dreamhack") >= 0) return "gold";
+    return "rlcs";
+  }
   function pickHtml(p) {
     var v = S && S.rlcTitles && S.rlcTitles[p.id];
-    if (!v || !v.choices || !v.choices.length) return "";
-    var opts = '<option value="">' + e6(tl("Auto ({title})", { title: v.auto || tl("best title") })) + "</option>" +
-      v.choices.map(function (c) { return '<option value="' + e6(c.key) + '"' + (v.pick === c.key ? " selected" : "") + ">" + e6(c.display) + "</option>"; }).join("");
-    return '<div class="rlc-title-pick"><span>' + e6(tl("In-game title")) + '</span><select class="pre-select" data-rlc-title="' + p.id + '">' + opts + "</select>" +
-      '<div class="rlc-title-note">' + e6(tl("Shown above his car in Rocket League.")) + "</div></div>";
+    var list = (v && v.choices) || [];
+    if (!list.length && !p.isUser) return "";
+    var picked = v && v.pick ? list.filter(function (c) { return c.key === v.pick; })[0] : null;
+    var text = (picked && picked.display) || (v && v.auto) || "";
+    var tid = (picked && picked.id) || (v && v.autoId) || "";
+    var team = p.teamId >= 0 ? teamById(p.teamId) : null;
+    var nums = ["482", "2", "1", "3", "4"].map(function (n) { return '<div class="rlc-sb-num">' + n + "</div>"; }).join("");
+    var preview = '<div class="rlc-sb"><div class="rlc-sb-hd"><span class="rlc-sb-team">' + e6(String((team && team.name) || tl("Free agent")).toUpperCase()) + "</span>" +
+      [tl("Score (scoreboard)"), tl("Goals (scoreboard)"), tl("Assists (scoreboard)"), tl("Saves (scoreboard)"), tl("Shots (scoreboard)"), tl("Ping (scoreboard)")].map(function (h) { return "<span>" + e6(h.replace(/ \(scoreboard\)$/, "").toUpperCase()) + "</span>"; }).join("") + "</div>" +
+      '<div class="rlc-sb-row"><div class="rlc-sb-who"><div class="rlc-sb-av">' + faceHtml(p.name, p.id, "") + '</div><div class="rlc-sb-id">' +
+      '<div class="rlc-sb-name">' + e6(p.name) + '</div><div class="rlc-sb-title ' + glowOf(tid, text) + '" data-rlc-live-title>' + e6(text ? text.toUpperCase() : tl("No title earned yet").toUpperCase()) + "</div></div></div>" +
+      nums + '<div class="rlc-sb-ping"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i><span style="margin-left:2px">0</span></div></div></div>';
+    if (!list.length) {
+      return '<div class="rlc-tcard"><div class="rlc-tcard-top"><span class="rlc-tcard-h">' + e6(tl("In-game title")) + '</span><span class="rlc-tcard-sub">' + e6(tl("Earned in your career")) + "</span></div>" + preview +
+        '<div class="rlc-tcard-sub">' + e6(tl("Win an Open, a Major, the Worlds or a 1v1/2v2 event to unlock titles. Titles won from the bench count too.")) + "</div></div>";
+    }
+    var opts = '<option value="" data-tid="' + e6(v.autoId || "") + '" data-text="' + e6(v.auto || "") + '"' + (!v.pick ? " selected" : "") + ">" + e6(tl("Auto ({title})", { title: v.auto || tl("best title") })) + "</option>" +
+      list.map(function (c) { return '<option value="' + e6(c.key) + '" data-tid="' + e6(c.id || "") + '" data-text="' + e6(c.display) + '"' + (v.pick === c.key ? " selected" : "") + ">" + e6(c.display) + "</option>"; }).join("");
+    return '<div class="rlc-tcard"><div class="rlc-tcard-top"><span class="rlc-tcard-h">' + e6(tl("In-game title & live preview")) + '</span><span class="rlc-tcard-sub">' +
+      e6(tln("{n} earned in this career", "{n} earned in this career", list.length)) + "</span></div>" + preview +
+      '<select class="rlc-tcard-sel" data-rlc-title="' + p.id + '">' + opts + "</select>" +
+      '<div class="rlc-tcard-sub" style="margin-top:6px">' + e6(p.isUser ? tl("Shown above your car in Rocket League.") : tl("Shown above his car in Rocket League.")) + "</div></div>";
   }
   try {
     var prev = playerModalHtml;
     playerModalHtml = function (p) {
       var html = prev.apply(this, arguments);
       try {
-        if (!p || p.isUser || p.teamId !== C().userTeamId) return html;
+        if (!p || !(p.isUser || p.teamId === C().userTeamId)) return html;
         var extra = pickHtml(p);
         if (!extra) return html;
         var i = html.lastIndexOf('<div class="btnrow"');
@@ -1506,13 +1530,33 @@
   } catch (e) { console.error("[rlc-mod] title pick", e); }
   try {
     var st = document.createElement("style");
-    st.textContent = ".rlc-title-pick{margin-top:14px;display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:center}.rlc-title-pick>span{font-weight:700;font-size:var(--f-small)}" +
-      ".rlc-title-pick select{width:100%;font-size:14px;padding:7px 10px;height:auto;min-height:0}.rlc-title-note{grid-column:2;font-size:var(--f-tiny);color:var(--text-dim)}";
+    // styles repris du Tag Selector de RL Career+ (Jinxy, MIT)
+    st.textContent = ".rlc-tcard{margin:14px 0 8px;padding:13px 14px;border-radius:10px;background:linear-gradient(180deg,#0f1827,#0a111d);border:1px solid #243a56}" +
+      ".rlc-tcard-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}" +
+      ".rlc-tcard-h{font-weight:900;font-size:11px;line-height:1.1;letter-spacing:.14em;text-transform:uppercase;color:#7ee8fa}.rlc-tcard-sub{font-size:11px;color:#8aa2bf}" +
+      ".rlc-sb{border-radius:7px;overflow-x:auto;border:1px solid rgba(96,165,250,.28);background:radial-gradient(ellipse at 24% 0%,rgba(28,82,168,.38),rgba(8,14,26,.96) 72%);padding:9px 12px 10px;margin-bottom:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}" +
+      ".rlc-sb-hd{display:grid;grid-template-columns:minmax(185px,1fr) 44px 38px 50px 42px 38px 38px;align-items:center;gap:8px;padding:0 8px 6px;font-weight:800;font-size:9.5px;line-height:1;letter-spacing:.04em;text-transform:uppercase;color:rgba(206,224,246,.82);border-bottom:1px solid rgba(125,180,255,.2);margin-bottom:6px;white-space:nowrap}" +
+      ".rlc-sb-hd span:not(:first-child){text-align:center}.rlc-sb-team{font-weight:800;font-size:12.5px;line-height:1;letter-spacing:.07em;color:#eef6ff;text-shadow:0 1px 4px rgba(0,0,0,.9);overflow:hidden;text-overflow:ellipsis}" +
+      ".rlc-sb-row{display:grid;grid-template-columns:minmax(185px,1fr) 44px 38px 50px 42px 38px 38px;align-items:center;gap:8px;padding:7px 8px;border-radius:4px;background:linear-gradient(90deg,rgba(24,78,176,.86) 0%,rgba(22,68,154,.74) 62%,rgba(14,42,102,.64) 100%);border-left:3px solid #38bdf8;box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 2px 10px rgba(0,0,0,.45)}" +
+      ".rlc-sb-who{display:flex;align-items:center;gap:10px;min-width:0}.rlc-sb-av{width:34px;height:34px;border-radius:4px;overflow:hidden;flex:none;background:#0d1a30;border:1px solid rgba(147,197,253,.45);display:grid;place-items:center}" +
+      ".rlc-sb-av .chat-face,.rlc-sb-av .crest,.rlc-sb-av img,.rlc-sb-av>*{width:100%!important;height:100%!important;margin:0!important;border-radius:3px!important;object-fit:cover}" +
+      ".rlc-sb-id{min-width:0;display:flex;flex-direction:column;gap:2px}.rlc-sb-name{font:700 13.5px/1.1 'Segoe UI',sans-serif;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 3px rgba(0,0,0,.9)}" +
+      ".rlc-sb-title{font:800 10.5px/1.2 'Bahnschrift','Segoe UI',sans-serif;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
+      ".rlc-sb-title.rlcs{color:#a8f3ff;text-shadow:0 0 6px #00c8ff,0 0 13px rgba(0,185,255,.92),0 0 22px rgba(0,136,255,.65),0 1px 2px rgba(0,0,0,.95)}" +
+      ".rlc-sb-title.gold{color:#fff0a6;text-shadow:0 0 6px #ffbe0b,0 0 13px rgba(255,170,0,.92),0 0 22px rgba(255,128,0,.65),0 1px 2px rgba(0,0,0,.95)}" +
+      ".rlc-sb-title.none{color:#94a3b8;text-shadow:0 1px 2px rgba(0,0,0,.9)}" +
+      ".rlc-sb-num{text-align:center;font:700 12.5px/1 'Bahnschrift','Segoe UI',sans-serif;color:#eef6ff;text-shadow:0 1px 2px rgba(0,0,0,.85)}" +
+      ".rlc-sb-ping{display:flex;align-items:flex-end;justify-content:center;gap:1.5px;color:#4ade80;font:700 11px/1 'Bahnschrift',sans-serif}.rlc-sb-ping i{display:inline-block;width:2.5px;background:#4ade80;border-radius:1px}" +
+      ".rlc-tcard-sel{width:100%;padding:8px 10px;border-radius:7px;background:#0a111d;border:1px solid #263f5e;color:#f1f5f9;font-weight:600;font-size:12.5px;line-height:1.2;font-family:inherit;cursor:pointer}.rlc-tcard-sel:focus{outline:none;border-color:#00d4ff}";
     document.head.appendChild(st);
   } catch (e) {}
   document.addEventListener("change", function (ev) {
     var el = ev.target;
     if (!el || !el.dataset || el.dataset.rlcTitle == null) return;
+    try {
+      var o = el.options[el.selectedIndex], card = el.closest(".rlc-tcard"), live = card && card.querySelector("[data-rlc-live-title]");
+      if (live && o) { var tx = o.getAttribute("data-text") || ""; live.textContent = (tx || tl("No title earned yet")).toUpperCase(); live.className = "rlc-sb-title " + glowOf(o.getAttribute("data-tid"), tx); }
+    } catch (e) {}
     window.rlcMod.pickTitle(el.dataset.rlcTitle, el.value || null).then(function (res) {
       if (res) S = res;
       showToast(el.value ? tl("Title saved: it shows from the next match") : tl("Back to the automatic title"));
@@ -1614,10 +1658,10 @@
   function rankingHtml(d) {
     var teams = d.teams.filter(function (t) { return A.region === "all" || t.region === A.region; })
       .sort(function (a, b) { return (d.ranking[b.id] || 0) - (d.ranking[a.id] || 0); });
-    return '<table class="arc-table arc-rank"><tr><th>#</th><th>' + e7(tl("Team")) + "</th><th>" + e7(tl("Region")) + '</th><th class="arc-r">' + e7(tl("Titles")) + '</th><th class="arc-r">' + e7(tl("Points")) + "</th></tr>" +
+    return '<div class="arc-rank-box"><table class="arc-table arc-rank"><tr><th>#</th><th>' + e7(tl("Team")) + "</th><th>" + e7(tl("Region")) + '</th><th class="arc-r">' + e7(tl("Titles")) + '</th><th class="arc-r">' + e7(tl("Points")) + "</th></tr>" +
       teams.map(function (t, i) {
         return "<tr" + (t.id === d.userTeamId ? ' class="me"' : "") + "><td>" + (i + 1) + "</td><td>" + teamLink(d, t.id) + "</td><td>" + e7(regName(d, t.region)) + '</td><td class="arc-r">' + (titlesOf(d, t.id) || "") + '</td><td class="arc-r"><b>' + (d.ranking[t.id] || 0) + "</b></td></tr>";
-      }).join("") + "</table>";
+      }).join("") + "</table></div>";
   }
   function teamsHtml(d) {
     var teams = d.teams.filter(function (t) { return A.region === "all" || t.region === A.region; }).sort(function (a, b) { return a.name.localeCompare(b.name); });
@@ -1681,7 +1725,7 @@
       ".arc-tag{font-style:normal;font-size:10px;font-weight:800;padding:1px 6px;border-radius:4px;background:var(--panel-2);border:1px solid var(--rule);margin-left:4px}.arc-reg{font-size:var(--f-small);color:var(--text-dim)}" +
       ".arc-team{display:inline-flex;align-items:center;gap:6px;cursor:pointer}.arc-team .crest{width:22px;height:22px;flex:0 0 22px}.arc-team small{color:var(--text-dim);margin-left:4px}.arc-team:hover .arc-tn{text-decoration:underline}.arc-dim{color:var(--text-dim);font-size:var(--f-small)}" +
       ".arc-detail{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:12px 14px 16px;margin:-2px 0 6px;background:var(--panel-2);border:1px solid var(--rule);border-top:none;border-radius:0 0 8px 8px}.arc-h{font-weight:900;margin-bottom:6px}" +
-      ".arc-table{width:100%;border-collapse:collapse;font-size:var(--f-small)}.arc-table td,.arc-table th{padding:4px 6px;border-bottom:1px solid var(--rule);text-align:left}.arc-table th{color:var(--text-dim);font-weight:700}.arc-r{text-align:right!important}.arc-table tr.me td{font-weight:800;background:rgba(127,127,127,.12)}" +
+      ".arc-rank-box{padding:8px 12px;background:var(--card,var(--panel-2));border:1px solid var(--rule);border-radius:8px}.arc-table{width:100%;border-collapse:collapse;font-size:var(--f-small)}.arc-table td,.arc-table th{padding:4px 6px;border-bottom:1px solid var(--rule);text-align:left}.arc-table th{color:var(--text-dim);font-weight:700}.arc-r{text-align:right!important}.arc-table tr.me td{font-weight:800;background:rgba(127,127,127,.12)}" +
       ".arc-pl{font-weight:900;width:44px}.arc-pl.g,.arc-res.g b{color:#d4a017}.arc-pl.s,.arc-res.s b{color:#9aa4ad}.arc-pl.b,.arc-res.b b{color:#b0703a}.arc-sh{font-weight:800;font-size:var(--f-tiny);text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin:8px 0 3px}" +
       ".arc-ser{display:grid;grid-template-columns:1fr 46px 1fr;gap:6px;font-size:var(--f-small);padding:2px 0}.arc-ser span{cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.arc-ser span:first-child{text-align:right}.arc-ser span.w{font-weight:800}.arc-ser b{text-align:center}" +
       ".arc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.arc-tile{display:flex;gap:10px;align-items:center;padding:10px;background:var(--card,var(--panel-2));border:1px solid var(--rule);border-radius:8px;cursor:pointer}.arc-tile:hover{border-color:var(--accent)}.arc-tile .crest{width:34px;height:34px}" +
@@ -1710,14 +1754,194 @@
 
 ;/* ===== RLC ENHANCER : credit ===== */
 (function () {
-  const RLC_MOD_VERSION = "1.2";
+  const RLC_MOD_VERSION = "1.3";
   if (typeof doctorHtml !== "function") return;
   const orig = doctorHtml;
   doctorHtml = function () {
     const html = orig.apply(this, arguments);
     const line = tl("RLC Enhancer v{v} by Milan. All rights reserved.").replace("{v}", RLC_MOD_VERSION);
     const presets = tl("Pro presets: RLCareerProPresets by Matiyo (MIT license).");
+    const bots = '<div style="margin-top:4px">' + esc(tl("Title selector style: RL Career+ by Jinxy (MIT license).")) + "</div>";
     return html + '<div class="rlc-credit" style="margin:18px 0 4px;text-align:center;font-size:12px;letter-spacing:.06em;opacity:.6">' + esc(line) +
-      '<div style="margin-top:4px">' + esc(presets) + "</div></div>";
+      '<div style="margin-top:4px">' + esc(presets) + "</div>" + bots + "</div>";
   };
+})();
+
+/* ===== RLC ENHANCER : coach d'entrainement, niveaux des scouts, entretien des installations, alerte medias ===== */
+(function () {
+  function e8(x) { return String(x == null ? "" : x).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function staff() { return (S && S.rlcStaff) || null; }
+  function lvName(n) { return [tl("No scout"), tl("Standard scout"), tl("Good scout"), tl("Elite scout")][n] || ""; }
+  function speedText(sp) { return sp > 1 ? tl("+{n}% speed", { n: Math.round((sp - 1) * 100) }) : tl("Base speed"); }
+
+  // ---- coach : page Entrainement ----
+  function coachHtml() {
+    var v = staff();
+    if (!v) return "";
+    var c = v.coach;
+    var body = c
+      ? '<div class="rlc-coach-l"><b>' + e8(c.name) + "</b> &middot; " + e8(tl("{money} a week", { money: fmtMoney(c.wage) })) +
+        '<div class="rlc-coach-s">' + e8(tl("Starts training on his own as soon as it is ready and fills empty slots with the players who will improve the most.")) +
+        (c.last ? " " + e8(tl("Last session: {date}.", { date: fmtDateShort(c.last.date) })) : "") + "</div></div>" +
+        '<button class="tsq-act" data-action="rlc-coach" data-yes="0">' + e8(tl("Let him go")) + "</button>"
+      : '<div class="rlc-coach-l"><b>' + e8(tl("Training coach")) + "</b> &middot; " + e8(tl("{money} a week", { money: fmtMoney(v.coachWage) })) +
+        '<div class="rlc-coach-s">' + e8(tl("Hire a coach and training runs by itself every week: no need to stop time.")) + "</div></div>" +
+        '<button class="tsq-act primary" data-action="rlc-coach" data-yes="1">' + e8(tl("Hire")) + "</button>";
+    return '<div class="rlc-coach' + (c ? " on" : "") + '">' + body + "</div>";
+  }
+  try {
+    var prevTrain = trainingHtml;
+    trainingHtml = function () {
+      var h = prevTrain.apply(this, arguments);
+      try {
+        if (isPlayerMode() || !staff()) return h;
+        var i = h.indexOf('<div class="tsq-actions">');
+        return i < 0 ? h : h.slice(0, i) + coachHtml() + h.slice(i);
+      } catch (e) { return h; }
+    };
+  } catch (e) { console.error("[rlc-mod] coach ui", e); }
+
+  // ---- scouts : fenetre Scouting ----
+  function scoutsHtml() {
+    var v = staff();
+    if (!v) return "";
+    var rows = v.scouts.map(function (s) {
+      var lv = v.levels.map(function (l) {
+        return '<button class="rlc-sl' + (l.level === s.level ? " on" : "") + '" data-action="rlc-scout-lv" data-id="' + s.id + '" data-level="' + l.level + '"' +
+          (l.level === s.level ? " disabled" : "") + ' title="' + e8(lvName(l.level) + (l.level ? " · " + speedText(l.speed) : "")) + '">' +
+          '<span class="rlc-sl-n">' + (l.level ? tl("Lv. {n}", { n: l.level }) : "0") + "</span>" +
+          '<span class="rlc-sl-w">' + (l.wage ? e8(tl("{money}/wk", { money: fmtMoney(l.wage) })) : e8(tl("free"))) + "</span></button>";
+      }).join("");
+      return '<div class="rlc-scout"><div class="rlc-scout-n"><b>' + e8(s.level ? s.name : tl("Empty seat")) + "</b><span>" +
+        e8(s.level ? lvName(s.level) + " · " + speedText(v.levels[s.level].speed) + (s.watching ? " · " + tl("watching {name}", { name: s.watching }) : "") : tl("No scout hired")) +
+        '</span></div><div class="rlc-sls">' + lv + "</div></div>";
+    }).join("");
+    return '<div class="rlc-scouts"><div class="rlc-scouts-h">' + e8(tl("Your scouts")) + '<span>' + e8(tl("Level 2 scouts work 20% faster, level 3 scouts 50% faster.")) + "</span></div>" + rows + "</div>";
+  }
+  try {
+    var prevScoutWin = scoutWindowHtml;
+    scoutWindowHtml = function () {
+      var h = prevScoutWin.apply(this, arguments);
+      try {
+        if (!staff()) return h;
+        var i = h.indexOf('<div class="sf-actions inline">');
+        return i < 0 ? h : h.slice(0, i) + scoutsHtml() + h.slice(i);
+      } catch (e) { return h; }
+    };
+  } catch (e) { console.error("[rlc-mod] scouts ui", e); }
+
+  // ---- loyer des installations : affiche dans chaque case ----
+  try {
+    var prevFacWin = facilitiesWindowHtml;
+    facilitiesWindowHtml = function () {
+      var h = prevFacWin.apply(this, arguments);
+      try {
+        var b = S && S.facilities;
+        if (!b || !Array.isArray(b.list)) return h;
+        var i = 0;
+        return h.replace(/<div class="fac-card-foot">/g, function (m) {
+          var f = b.list[i++];
+          if (!f || f.upkeep == null) return m;
+          return '<div class="rlc-rent">' + e8(tl("Rent: {money}", { money: fmtMoney(f.upkeep) })) + "</div>" + m;
+        });
+      } catch (e) { return h; }
+    };
+  } catch (e) { console.error("[rlc-mod] rent ui", e); }
+
+  // ---- mail du 1er du mois : ce que le club a paye ----
+  try {
+    var prevMailBody = mailBodyHtml;
+    mailBodyHtml = function (m) {
+      var x = m && m.data && m.data.rlcExpenses;
+      if (!x) return prevMailBody.apply(this, arguments);
+      try {
+        var rows = (x.lines || []).map(function (l) {
+          var name = l.k === "wages" ? tl("Player and staff wages") : l.k === "coach" ? tl("Training coach") : l.k === "scouts" ? tl("Scouts") : l.k === "rent" ? tl("Rent: {name}", { name: l.name || "" }) : (l.name || "");
+          return "<tr><td>" + e8(name) + '</td><td class="rlc-exp-v">' + e8(fmtMoney(l.amount)) + "</td></tr>";
+        }).join("");
+        return '<span class="mail-hi">' + e8(tl("Hello coach,")) + "</span>" +
+          e8(tl("Here is what the club paid between {from} and {to}.", { from: fmtDateShort(x.from), to: fmtDateShort(x.to) })) +
+          '<table class="rlc-exp">' + rows + '<tr class="rlc-exp-t"><td>' + e8(tl("Total")) + '</td><td class="rlc-exp-v">' + e8(fmtMoney(x.total)) + "</td></tr></table>" +
+          e8(tl("Money left in the bank: {money}.", { money: fmtMoney(x.budget) })) +
+          '<span class="mail-sign">' + e8(tl("The club accountant")) + "</span>";
+      } catch (e) { return prevMailBody.apply(this, arguments); }
+    };
+  } catch (e) { console.error("[rlc-mod] expenses mail", e); }
+
+  // ---- alerte medias : le joueur manquera un tournoi ----
+  function clashHtml(o) {
+    var c = S && S.rlcMediaClash && S.rlcMediaClash[o.id];
+    if (!c || !c.list || !c.list.length || o.accepted) return "";
+    var items = c.list.slice(0, 4).map(function (x) {
+      return "<li><b>" + e8(x.name) + "</b>" + (x.mode && x.mode !== "3v3" ? " (" + e8(x.mode) + ")" : "") + " &middot; " + e8(fmtDateShort(x.date)) +
+        (x.maybe ? ' <i>' + e8(tl("if you qualify")) + "</i>" : "") + "</li>";
+    }).join("");
+    return '<div class="rlc-media-alert"><div class="rlc-media-alert-h">&#9888; ' + e8(tl("{name} will be ABSENT for:", { name: o.playerName })) + "</div><ul>" + items + "</ul>" +
+      '<div class="rlc-media-alert-s">' + e8(tl("If you accept, he is away until {date} and cannot play these matches.", { date: fmtDateShort(c.until) })) + "</div></div>";
+  }
+  try {
+    var prevMedia = mediaDetailHtml;
+    mediaDetailHtml = function (o) {
+      var h = prevMedia.apply(this, arguments);
+      try {
+        if (!o) return h;
+        var a = clashHtml(o);
+        if (!a) return h;
+        var i = h.indexOf('<div class="mo-mail">');
+        if (i < 0) i = h.indexOf('<div class="mo-foot-row">');
+        return i < 0 ? a + h : h.slice(0, i) + a + h.slice(i);
+      } catch (e) { return h; }
+    };
+  } catch (e) { console.error("[rlc-mod] media alert", e); }
+
+  // ---- actions ----
+  function run(act, okMsg) {
+    window.rlcMod.staff(act).then(function (res) {
+      if (res) S = res;
+      var r = res && res.rlc;
+      if (r && r.ok) { if (okMsg) showToast(okMsg); }
+      else showToast((r && r.error) || tl("Could not do that."), "error");
+      render();
+    }).catch(function (e) { showToast(tl("Error: {message}", { message: e.message }), "error"); });
+  }
+  document.addEventListener("click", function (ev) {
+    var el = ev.target && ev.target.closest && ev.target.closest('[data-action="rlc-coach"],[data-action="rlc-scout-lv"]');
+    if (!el || el.disabled) return;
+    ev.preventDefault(); ev.stopPropagation();
+    if (el.dataset.action === "rlc-coach") {
+      var yes = el.dataset.yes === "1";
+      run({ kind: "coach", yes: yes }, yes ? tl("Training coach hired") : tl("Training coach let go"));
+    } else {
+      var lvl = Number(el.dataset.level);
+      run({ kind: "scout", id: Number(el.dataset.id), level: lvl }, lvl ? tl("Scout is now level {n}", { n: lvl }) : tl("Scout let go"));
+    }
+  }, true);
+  // l'alerte reste visible aussi au moment d'accepter
+  document.addEventListener("click", function (ev) {
+    var el = ev.target && ev.target.closest && ev.target.closest('[data-action="media-accept"]');
+    if (!el || el.disabled || el.dataset.rlcOk === "1") return;
+    var c = S && S.rlcMediaClash && S.rlcMediaClash[Number(el.dataset.id)] || S && S.rlcMediaClash && S.rlcMediaClash[el.dataset.id];
+    if (!c || !c.list || !c.list.length) return;
+    ev.preventDefault(); ev.stopPropagation();
+    el.dataset.rlcOk = "1";
+    el.classList.add("rlc-confirm");
+    var w = el.querySelector(".mo-accept-word");
+    if (w) w.textContent = tl("Click again: he misses {name}", { name: c.list[0].name });
+    setTimeout(function () { try { delete el.dataset.rlcOk; el.classList.remove("rlc-confirm"); } catch (e) {} }, 5000);
+  }, true);
+  try {
+    var st = document.createElement("style");
+    st.textContent = ".rlc-coach{display:flex;align-items:center;gap:14px;margin:12px 0 4px;padding:12px 14px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12)}" +
+      ".rlc-coach.on{border-color:rgba(74,222,128,.55);background:rgba(74,222,128,.08)}.rlc-coach-l{flex:1;min-width:0;font-size:var(--f-small)}.rlc-coach-s{margin-top:3px;font-size:var(--f-tiny);color:var(--text-dim)}" +
+      ".rlc-scouts{margin:10px 0 12px;display:flex;flex-direction:column;gap:6px}.rlc-scouts-h{font-weight:800;display:flex;flex-direction:column;gap:2px}.rlc-scouts-h span{font-weight:400;font-size:var(--f-tiny);color:var(--text-dim)}" +
+      ".rlc-scout{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.1)}.rlc-scout-n{flex:1;min-width:0;display:flex;flex-direction:column;font-size:var(--f-small)}.rlc-scout-n span{font-size:var(--f-tiny);opacity:.75}" +
+      ".rlc-sls{display:flex;gap:4px}.rlc-sl{display:flex;flex-direction:column;align-items:center;min-width:64px;padding:4px 6px;border-radius:6px;border:1px solid rgba(0,0,0,.2);background:#fff;color:#1d2330;cursor:pointer;font:inherit}" +
+      ".rlc-sl:hover:not([disabled]){border-color:#2563eb}.rlc-sl.on{background:#1d2330;color:#fff;border-color:#1d2330;cursor:default}.rlc-sl-n{font-weight:800;font-size:12px}.rlc-sl-w{font-size:10px;opacity:.8}" +
+      ".rlc-rent{margin:6px 0 2px;font-size:12px;font-weight:700;opacity:.85}.rlc-exp{width:100%;max-width:420px;margin:10px 0;border-collapse:collapse}.rlc-exp td{padding:5px 8px;border-bottom:1px solid rgba(0,0,0,.12)}.rlc-exp-v{text-align:right;white-space:nowrap}.rlc-exp-t td{font-weight:800;border-bottom:none}" +
+      ".rlc-media-alert{margin:12px 0;padding:12px 14px;border-radius:10px;background:#b91c1c;color:#fff;border:2px solid #fecaca;box-shadow:0 0 0 3px rgba(185,28,28,.35);animation:rlcPulse 1.6s ease-in-out infinite}" +
+      ".rlc-media-alert-h{font-weight:900;font-size:15px;letter-spacing:.02em;text-transform:uppercase}.rlc-media-alert ul{margin:6px 0 4px 18px;padding:0}.rlc-media-alert li{margin:2px 0}.rlc-media-alert i{opacity:.85}" +
+      ".rlc-media-alert-s{font-size:var(--f-tiny);opacity:.92}@keyframes rlcPulse{0%,100%{box-shadow:0 0 0 3px rgba(185,28,28,.35)}50%{box-shadow:0 0 0 7px rgba(185,28,28,.15)}}" +
+      ".mo-accept.rlc-confirm{background:#b91c1c!important;color:#fff!important}";
+    document.head.appendChild(st);
+  } catch (e) {}
 })();

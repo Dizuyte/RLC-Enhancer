@@ -4,7 +4,7 @@ title RLC Enhancer installer - by Milan
 cd /d "%~dp0"
 echo.
 echo  ==================================================
-echo    RLC Enhancer v1.2 for RL Career Hub - by Milan
+echo    RLC Enhancer v1.3 for RL Career Hub - by Milan
 echo  ==================================================
 echo.
 if exist "%~dp0files\install.js" goto unzipped

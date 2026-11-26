@@ -69,7 +69,7 @@
     if (!picks || typeof look !== "function") return prevMatchLines.apply(this, arguments);
     const look2 = function (st, x) {
       const p = look(st, x);
-      if (p && !p.isUser && p.id != null && picks[p.id] && p.teamId === state.userTeamId) return Object.assign({}, p, { __rlcPick: picks[p.id] });
+      if (p && p.id != null && picks[p.id] && (p.isUser || p.id === state.userPlayerId || p.teamId === state.userTeamId)) return Object.assign({}, p, { __rlcPick: picks[p.id] });
       return p;
     };
     return prevMatchLines.call(this, state, list, look2);

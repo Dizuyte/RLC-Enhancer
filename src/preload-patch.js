@@ -16,6 +16,7 @@
       buyBuilding: function (key) { return e.ipcRenderer.invoke("rlc-biz-buy", String(key)); },
       answerBootcamp: function (id, yes) { return e.ipcRenderer.invoke("rlc-bootcamp-answer", Number(id), !!yes); },
       pickTitle: function (pid, key) { return e.ipcRenderer.invoke("rlc-title-pick", Number(pid), key || null); },
+      staff: function (act) { return e.ipcRenderer.invoke("rlc-staff", act || {}); },
       archive: function (q) { return e.ipcRenderer.invoke("rlc-archive", q || {}); },
     });
   } catch (err) { console.error("[rlc-mod] preload", err); }

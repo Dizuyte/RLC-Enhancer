@@ -37,6 +37,10 @@ https://github.com/Managone/RLCareerProPresets, under the MIT license
 (Copyright (c) 2026 Matiyo, see LICENSE in that folder). This license does
 not cover them: they stay under their own MIT license.
 
+Third-party part: the look of the title selector comes from RL Career+ by
+Jinxy, https://github.com/jinxy6/RL-Career-Plus, under the MIT license
+(Copyright (c) 2026 Jinxy). This license does not cover that part.
+
 -------------------------------------------------------------------------------
 
 RLC Enhancer - Licence (traduction francaise)
@@ -75,3 +79,8 @@ Partie tierce : les fichiers de "files\presets" (installes dans
 https://github.com/Managone/RLCareerProPresets, sous licence MIT
 (Copyright (c) 2026 Matiyo, voir LICENSE dans ce dossier). Cette licence ne
 les couvre pas : ils restent sous leur propre licence MIT.
+
+Partie tierce : le style du selecteur de titre vient de RL Career+ par Jinxy,
+https://github.com/jinxy6/RL-Career-Plus, sous licence MIT (Copyright (c) 2026
+Jinxy). Cette licence ne couvre pas cette partie.
+

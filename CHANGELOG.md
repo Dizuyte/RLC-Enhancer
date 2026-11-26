@@ -2,6 +2,42 @@
 
 RLC Enhancer was called RLC Mod up to v1.1.
 
+## v1.3
+
+### 🏢 Club management
+- **Facility rent.** Your club now pays **1.5% a month** of the price of its most expensive base-game facility, on the 1st of each month (only your biggest facility counts). Each facility card shows its rent in **Office > Facilities**.
+- **Monthly expenses mail.** On the 1st of each month, a mail sums up what the club paid: wages, coach, scouts and rent.
+- **Training coach ($750/week).** Hire him on the **Training** page. He starts training on his own as soon as it's ready, so you don't have to stop time anymore, and fills empty slots with the players who have the most room to grow.
+- **Scout levels.** Each of your 3 scouts has his own level, set in the **Scouting** window:
+
+  | Level | Wage | Speed |
+  |---|---|---|
+  | 0 | none | no scout |
+  | 1 | $500/week | normal |
+  | 2 | $700/week | +20% |
+  | 3 | $1,000/week | +50% |
+
+  Existing saves start with level 1 scouts, new careers with no scout.
+
+### 🏆 Titles
+- **Choose your own player's title**, from every title you won during your career, even the ones won from the bench.
+- **New title selector** in the style of RL Career+: a live scoreboard preview with the real in-game glow (blue for RLCS, gold for the big events).
+
+### 🎮 In Rocket League (BakkesMod needed)
+- **Pro camera for the bots.** When you watch a match from a bot's view, you get a pro-style camera instead of the default one: FOV 110, distance 270, height 100, angle -4, stiffness 0.45, swivel 4.7, transition 1.2. Your own camera is never touched. To turn it off, type `rlc_botcam 0` in the BakkesMod console.
+- The plugin loads when Rocket League starts, so **start the mod before Rocket League** (or restart Rocket League).
+
+### 📺 Media offers
+- A **big red warning** now tells you when a player you send to the media would miss an Open, a Major, the Worlds, a 1v1/2v2 event or a league match. Majors and the Worlds show "if you qualify".
+- Accepting an offer with a conflict needs a **second click**, so you can't miss it by accident.
+
+### Fixes
+- Archives: the RLCS ranking now has the same solid background as the other tabs, so it's readable everywhere.
+
+### 🤝 Credits
+- **Jinxy – [RL Career+](https://github.com/jinxy6/RL-Career-Plus)** (MIT): the look of the title selector.
+- **Matiyo – [RLCareerProPresets](https://github.com/Managone/RLCareerProPresets)** (MIT): pro car presets, still included since v1.2.
+
 ## v1.2
 
 ### 🤝 RLC Enhancer × RLCareerProPresets

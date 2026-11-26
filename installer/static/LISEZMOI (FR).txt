@@ -1,9 +1,37 @@
-RLC Enhancer v1.2 pour RL Career Hub - par Milan
+RLC Enhancer v1.3 pour RL Career Hub - par Milan
 ================================================
 
 Compatible : RL Career Hub 0.2.0-beta.33 sur Windows.
 Ton RL Career Hub normal n'est PAS modifie : le mod tourne dans sa propre
 copie du jeu, avec ses propres saves.
+
+NOUVEAU DANS LA v1.3
+- Loyer des installations : ton club paie 1,5 % par mois du prix de sa
+  plus grosse installation (ca ne s'additionne pas), le 1er du mois. Chaque
+  installation affiche son loyer dans Bureau > Installations.
+- Mail des depenses : le 1er de chaque mois, un mail recapitule ce que le
+  club a paye (salaires, coach, scouts, loyer).
+- Coach d'entrainement (750 $ par semaine, page Entrainement) : il lance
+  l'entrainement tout seul des qu'il est pret, plus besoin d'arreter le
+  temps, et remplit les creneaux vides avec les joueurs qui ont le plus de
+  marge de progression.
+- Niveaux des scouts, scout par scout, dans la fenetre Recrutement :
+  niveau 0 (pas de scout), niveau 1 (500 $/semaine), niveau 2 (+20 % de
+  vitesse, 700 $), niveau 3 (+50 % de vitesse, 1 000 $). Les saves
+  existantes demarrent au niveau 1, les nouvelles carrieres au niveau 0.
+- Choisis le titre en jeu de ton propre joueur, parmi tous les titres
+  gagnes pendant ta carriere, meme depuis le banc.
+- Nouveau selecteur de titre, dans le style de RL Career+ par Jinxy :
+  apercu du scoreboard en direct avec la vraie lueur bleue (RLCS) ou doree.
+- Camera de pro pour les bots : quand tu regardes un match en vue d'un bot,
+  la camera est reglee comme un pro (FOV 110, distance 270, hauteur 100,
+  angle -4, rigidite 0.45, swivel 4.7, transition 1.2). Ta camera a toi
+  n'est jamais touchee. Tape "rlc_botcam 0" dans la console BakkesMod pour
+  la couper. Il faut BakkesMod.
+- Offres medias : grosse alerte rouge quand le joueur raterait un tournoi
+  ou un match pendant son absence, et Accepter demande un deuxieme clic.
+- Le plugin camera se charge au lancement de Rocket League : lance le mod
+  avant Rocket League (ou redemarre Rocket League).
 
 NOUVEAU DANS LA v1.2
 - Le mod s'appelle maintenant RLC Enhancer (avant : RLC Mod). Meme mod, meme
@@ -45,7 +73,7 @@ INSTALLATION
 6. Attends quelques minutes pendant la copie du jeu (il faut quelques Go
    libres), jusqu'a "Termine !".
 7. Lance le mod avec le raccourci "RL Career Hub MOD" sur ton bureau.
-   En bas de l'onglet Setup, tu dois voir "RLC Enhancer v1.2 par Milan".
+   En bas de l'onglet Setup, tu dois voir "RLC Enhancer v1.3 par Milan".
 
 OU SONT LES FICHIERS
 - Jeu modde et saves : Documents\RL Career Hub Mod

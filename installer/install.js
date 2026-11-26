@@ -193,11 +193,11 @@ function psFolder(name, fallback) {
   return fallback;
 }
 function q(s) { return "'" + String(s).replace(/'/g, "''") + "'"; }
-function makeShortcut(lnk, exe, args, workdir) {
+function makeShortcut(lnk, exe, args, workdir, desc) {
   const script =
     "$s=(New-Object -ComObject WScript.Shell).CreateShortcut(" + q(lnk) + ");" +
     "$s.TargetPath=" + q(exe) + ";$s.Arguments=" + q(args) + ";$s.WorkingDirectory=" + q(workdir) + ";" +
-    "$s.IconLocation=" + q(exe + ",0") + ";$s.Description='RL Career Hub MOD';$s.Save()";
+    "$s.IconLocation=" + q(exe + ",0") + ";$s.Description=" + q(desc || "RL Career Hub MOD") + ";$s.Save()";
   cp.execFileSync("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script], { stdio: "ignore" });
 }
 
@@ -258,6 +258,47 @@ function installPresets(here, root, game) {
   say("Pro presets installed (RLCareerProPresets by Matiyo).", "Presets des pros installes (RLCareerProPresets par Matiyo).");
 }
 
+// ---------- RLCareer Overhaul bot gameplay (Ettyg99, MIT) ----------
+// Same hooks as its install-bot-style.py (hooks.json), in the modded copy's rlbot folder only.
+function installBotStyle(here, game) {
+  const src = path.join(here, "botstyle");
+  if (!fs.existsSync(path.join(src, "rlc_bot_style.py")) || !fs.existsSync(path.join(src, "BOTS-ENABLED"))) return false;
+  const rlbot = path.join(game, "resources", "rlbot");
+  const hooks = JSON.parse(fs.readFileSync(path.join(src, "hooks.json"), "utf8"));
+  const writes = [];
+  for (const rel of Object.keys(hooks)) {
+    const file = path.join(rlbot, ...rel.split("/"));
+    const raw = fs.readFileSync(file, "utf8");
+    const crlf = raw.indexOf("\r\n") >= 0;
+    let text = raw.replace(/\r\n/g, "\n").split("# Career" + "+ bot styles").join("# RLCareer Overhaul bot styles");
+    for (const [clean, patched] of hooks[rel]) {
+      if (text.indexOf(patched) >= 0) continue;
+      if (text.split(clean).length !== 2) throw new Error("unsupported " + rel);
+      text = text.replace(clean, () => patched);
+    }
+    const out = crlf ? text.replace(/\n/g, "\r\n") : text;
+    if (out !== raw) writes.push([file, out]);
+  }
+  for (const name of ["rlc_bot_style.py", "rlc_advanced_moves.py"]) fs.copyFileSync(path.join(src, name), path.join(rlbot, name));
+  for (const [file, out] of writes) { fs.writeFileSync(file + ".tmp", out, "utf8"); fs.renameSync(file + ".tmp", file); }
+  for (const f of ["LICENSE", "NOTICE.txt", "SOURCE-COMMIT.txt"]) {
+    try { fs.mkdirSync(path.join(game, "..", "bot-gameplay"), { recursive: true }); fs.copyFileSync(path.join(src, f), path.join(game, "..", "bot-gameplay", f)); } catch (_e) {}
+  }
+  return true;
+}
+
+// ---------- bot camera plugin (RLC Enhancer) ----------
+// The BakkesMod plugin goes next to the copy's app.asar; the mod copies it into BakkesMod
+// and has Rocket League load it at start.
+function installPlugins(here, game) {
+  const bc = path.join(here, "botcam", "rlcbotcam.dll");
+  if (!fs.existsSync(bc)) return false;
+  const dest = path.join(game, "resources", "rlc");
+  fs.mkdirSync(dest, { recursive: true });
+  fs.copyFileSync(bc, path.join(dest, "rlcbotcam.dll"));
+  return true;
+}
+
 function main() {
   const args = process.argv.slice(2);
   const here = __dirname;
@@ -276,7 +317,10 @@ function main() {
   if (!fs.existsSync(srcExe) || !fs.existsSync(srcAsarFile)) fail("RL Career Hub was not found in " + gameDir, "RL Career Hub est introuvable dans " + gameDir);
 
   const docs = psFolder("MyDocuments", path.join(os.homedir(), "Documents"));
-  const root = path.join(docs, "RL Career Hub Mod");
+  // test edition: its own copy and data, next to the normal mod copy
+  const TEST = args.includes("--test") || fs.existsSync(path.join(here, "TEST-EDITION"));
+  const NAME = TEST ? "RL Career Hub TEST" : "RL Career Hub MOD";
+  const root = path.join(docs, TEST ? "RL Career Hub Test" : "RL Career Hub Mod");
   const game = path.join(root, "RL Career Hub");
   const data = path.join(root, "rl-career-hub (AppData)");
   const exe = path.join(game, "RL Career Hub.exe");
@@ -326,8 +370,8 @@ function main() {
   // 3. patch
   say("Installing the mod ...", "Installation du mod ...");
   try { writeAsar(base, planChanges(base, payload), asarFile); } catch (e) {
-    fail("Could not write the game files (" + (e.code || e.message) + "). Close RL Career Hub MOD and try again.",
-      "Impossible d'ecrire les fichiers du jeu (" + (e.code || e.message) + "). Ferme RL Career Hub MOD et reessaie.");
+    fail("Could not write the game files (" + (e.code || e.message) + "). Close " + NAME + " and try again.",
+      "Impossible d'ecrire les fichiers du jeu (" + (e.code || e.message) + "). Ferme " + NAME + " et reessaie.");
   }
 
   // 3b. pro presets (RLCareerProPresets by Matiyo, MIT): files next to the copy + hook in its start_match.py
@@ -336,9 +380,26 @@ function main() {
       "Presets des pros non installes (" + (e.code || e.message) + "). Le mod marche sans.");
   }
 
+  // 3c. pro camera for the bots (BakkesMod plugin)
+  try {
+    if (installPlugins(here, game)) say("Pro camera for the bots installed.", "Camera de pro des bots installee.");
+  } catch (e) {
+    say("Bot camera plugin not installed (" + (e.code || e.message) + "). The mod works without it.",
+      "Plugin camera des bots non installe (" + (e.code || e.message) + "). Le mod marche sans.");
+  }
+
+  // 3d. bot gameplay (RLCareer Overhaul by Ettyg99, MIT), shipped in the test edition
+  try {
+    if (installBotStyle(here, game)) say("Bot gameplay installed (RLCareer Overhaul by Ettyg99).", "Gameplay des bots installe (RLCareer Overhaul par Ettyg99).");
+  } catch (e) {
+    say("Bot gameplay not installed (" + (e.code || e.message) + "). The mod works without it.",
+      "Gameplay des bots non installe (" + (e.code || e.message) + "). Le mod marche sans.");
+  }
+
   // 4. saves
   if (!fs.existsSync(data)) {
-    const appData = process.env.APPDATA ? path.join(process.env.APPDATA, "rl-career-hub") : null;
+    const modData = path.join(docs, "RL Career Hub Mod", "rl-career-hub (AppData)");
+    const appData = TEST && fs.existsSync(modData) ? modData : process.env.APPDATA ? path.join(process.env.APPDATA, "rl-career-hub") : null;
     if (importSaves && appData && fs.existsSync(appData)) {
       say("Copying your saves and settings ...", "Copie de tes saves et reglages ...");
       const junk = new Set(["cache", "code cache", "gpucache", "dawngraphitecache", "dawnwebgpucache", "blob_storage", "shared dictionary", "lockfile", "network", "crashpad"]);
@@ -359,21 +420,21 @@ function main() {
 
   // 5. launchers
   const argLine = '--user-data-dir="' + data + '"';
-  fs.writeFileSync(path.join(root, "Launch RL Career Hub MOD.bat"),
+  fs.writeFileSync(path.join(root, "Launch " + NAME + ".bat"),
     "@echo off\r\nrem RLC Enhancer by Milan. Launches the modded copy with its own data.\r\nstart \"\" \"%~dp0RL Career Hub\\RL Career Hub.exe\" --user-data-dir=\"%~dp0rl-career-hub (AppData)\"\r\n");
   try { fs.copyFileSync(path.join(here, "LICENSE.txt"), path.join(root, "LICENSE.txt")); } catch (_e) {}
   const desktop = psFolder("Desktop", path.join(os.homedir(), "Desktop"));
   let lnkOk = true;
   try {
-    makeShortcut(path.join(root, "RL Career Hub MOD.lnk"), exe, argLine, game);
-    makeShortcut(path.join(desktop, "RL Career Hub MOD.lnk"), exe, argLine, game);
+    makeShortcut(path.join(root, NAME + ".lnk"), exe, argLine, game, NAME);
+    makeShortcut(path.join(desktop, NAME + ".lnk"), exe, argLine, game, NAME);
   } catch (_e) { lnkOk = false; }
 
   fs.writeFileSync(path.join(root, "rlc-mod-version.txt"), "RLC Enhancer " + payload.mod + " for RL Career Hub " + baseVersion + "\r\n");
   say("", "");
   say("Done! RLC Enhancer v" + payload.mod + " is installed in " + root, "Termine ! RLC Enhancer v" + payload.mod + " est installe dans " + root);
-  if (lnkOk) say('Start it with the "RL Career Hub MOD" shortcut on your desktop.', 'Lance-le avec le raccourci "RL Career Hub MOD" sur ton bureau.');
-  else say('Start it with "Launch RL Career Hub MOD.bat" in that folder.', 'Lance-le avec "Launch RL Career Hub MOD.bat" dans ce dossier.');
+  if (lnkOk) say('Start it with the "' + NAME + '" shortcut on your desktop.', 'Lance-le avec le raccourci "' + NAME + '" sur ton bureau.');
+  else say('Start it with "Launch ' + NAME + '.bat" in that folder.', 'Lance-le avec "Launch ' + NAME + '.bat" dans ce dossier.');
   say("Your normal RL Career Hub is not modified.", "Ton RL Career Hub normal n'est pas modifie.");
 }
 

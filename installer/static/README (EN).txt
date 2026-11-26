@@ -1,9 +1,35 @@
-RLC Enhancer v1.2 for RL Career Hub - by Milan
+RLC Enhancer v1.3 for RL Career Hub - by Milan
 ==============================================
 
 Works with: RL Career Hub 0.2.0-beta.33 on Windows.
 Your normal RL Career Hub is NOT modified: the mod runs in its own copy of
 the game, with its own saves.
+
+NEW IN v1.3
+- Facility rent: your club pays 1.5% a month of the price of its biggest
+  base facility (they don't add up), on the 1st of each month. Each
+  facility shows its rent in Office > Facilities.
+- Monthly expenses mail: on the 1st of each month, a mail sums up what the
+  club paid (wages, coach, scouts, rent).
+- Training coach ($750 a week, on the Training page): he runs training on
+  his own as soon as it is ready, so you don't have to stop time anymore,
+  and fills empty slots with the players who have the most room to grow.
+- Scout levels, per scout, in the Scouting window: level 0 (no scout),
+  level 1 ($500 a week), level 2 (+20% speed, $700), level 3 (+50% speed,
+  $1,000). Existing saves start at level 1, new careers at level 0.
+- Pick your own player's in-game title, from every title you won in your
+  career, even from the bench.
+- New title selector, in the style of RL Career+ by Jinxy: a live preview
+  of the scoreboard with the real blue (RLCS) or gold glow.
+- Pro camera for the bots: when you watch a match from a bot's view, it
+  uses a pro-style camera instead of the default one (FOV 110, distance 270,
+  height 100, angle -4, stiffness 0.45, swivel 4.7, transition 1.2). Your
+  own camera is never changed. Type "rlc_botcam 0" in the BakkesMod console
+  to turn it off. Needs BakkesMod.
+- Media offers: a big red alert when the player would miss an event or a
+  match while away, and Accept asks for a second click.
+- The camera plugin loads when Rocket League starts: start the mod before
+  Rocket League (or restart Rocket League).
 
 NEW IN v1.2
 - The mod is now called RLC Enhancer (it was RLC Mod). Same mod, same folder,
@@ -43,7 +69,7 @@ INSTALL
 6. Wait a few minutes while the game is copied (you need a few GB free),
    until it says "Done!".
 7. Start the mod with the "RL Career Hub MOD" shortcut on your desktop.
-   At the bottom of the Setup tab you should see "RLC Enhancer v1.2 by Milan".
+   At the bottom of the Setup tab you should see "RLC Enhancer v1.3 by Milan".
 
 WHERE THINGS ARE
 - Mod game and saves: Documents\RL Career Hub Mod

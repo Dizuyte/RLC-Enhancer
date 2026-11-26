@@ -1,12 +1,12 @@
 # RLC Enhancer for RL Career Hub
 
-RLC Enhancer (formerly RLC Mod) is a mod for **RL Career Hub** (Rocket League career game) by Milan. Current version: **v1.2**.
+RLC Enhancer (formerly RLC Mod) is a mod for **RL Career Hub** (Rocket League career game) by Milan. Current version: **v1.3**.
 
 **Collab:** the bots wear their pros' real presets thanks to [RLCareerProPresets](https://github.com/Managone/RLCareerProPresets) by **Matiyo** (MIT license), installed automatically with RLC Enhancer.
 
 ## Download and install
 
-1. Download `RLC-Enhancer-v1.2.zip` from the [latest release](../../releases/latest).
+1. Download `RLC-Enhancer-v1.3.zip` from the [latest release](../../releases/latest).
 2. Right-click the zip > "Extract All...", close RL Career Hub, then double-click `Install RLC Enhancer.bat`.
 3. Start the game with the **RL Career Hub MOD** shortcut on your desktop.
 
@@ -31,6 +31,12 @@ Built for **RL Career Hub 0.2.0-beta.33** (Electron 33). The game's own code is 
 - In-game title pick: on the profile of each player of the user's club, choose which of the titles he has won shows above his car in Rocket League (for example 3v3 or 2v2 World Champion), or keep "Auto".
 - Archives tab (Liquipedia style): every season of the save, every region and every event (3v3, 1v1, 2v2, EWC) with final standings, prize money and series by stage, the season's RLCS ranking, and a page per team with its results season by season.
 - Pro presets, in collab with [RLCareerProPresets](https://github.com/Managone/RLCareerProPresets) by Matiyo: every bot of a career match uses one of its pro player's real presets, read from about 78,000 pro replays. The installer copies Matiyo's files unchanged to `Documents\RL Career Hub Mod\presets` and adds his `RLCareerLiveries` hook to the modded copy's `resources\rlbot\start_match.py` only. Settings in `presets\config.json`.
+- Facility rent: 1.5% a month of the price of the club's biggest base facility (only that one counts), paid on the 1st and shown on each facility card. A mail on the 1st of each month sums up what the club paid (wages, coach, scouts, rent).
+- Training coach ($750 a week, Training page): runs training on his own as soon as it is ready, and fills empty slots with the players who have the most room to grow.
+- Scout levels, per scout (Scouting window): 0 (no scout), 1 ($500/week), 2 (+20% speed, $700/week), 3 (+50% speed, $1,000/week). Existing saves start at level 1, new careers at level 0.
+- The user's own player can pick his in-game title too, from every title won in the career (bench included). The title selector shows a live scoreboard preview with the in-game glow, in the style of [RL Career+](https://github.com/jinxy6/RL-Career-Plus) by Jinxy (MIT).
+- Pro camera for the bots: a small BakkesMod plugin (`vendor/RLCBotCam/rlcbotcam.dll`) gives every bot of an offline match a pro-style camera, so watching from a bot's view looks like a pro's camera. The user's own camera is never touched; `rlc_botcam 0` turns it off. The mod copies it into BakkesMod and adds it to `cfg/plugins.cfg`, so it loads when Rocket League starts.
+- Media offers: a red warning lists the events and matches the player would miss while away, and accepting such an offer needs a second click.
 - New calendar colours; every text goes through the game's language system (English keys, French translations).
 
 ## Layout
@@ -41,7 +47,7 @@ Built for **RL Career Hub 0.2.0-beta.33** (Electron 33). The game's own code is 
 | `src/main-patch.js` | end of `main.js` |
 | `src/preload-patch.js` | end of `preload.js` |
 | `src/renderer-patch.js` | end of `renderer/app.js` |
-| `src/engine-patch.js`, `src/engine-modes.js`, `src/engine-career.js`, `src/engine-business.js`, `src/engine-archive.js` | end of `engine/league.js`, in that order |
+| `src/engine-patch.js`, `src/engine-modes.js`, `src/engine-career.js`, `src/engine-business.js`, `src/engine-archive.js`, `src/engine-staff.js` | end of `engine/league.js`, in that order |
 | `src/rlc-mod-lang.js` | new file `renderer/lang/rlc-mod.js`, loaded from `renderer/index.html` right after `lang/ar.js` |
 
 One line of the game is changed, in `main.js`: the "watch the match" check that requires 6 bots (3v3) is wrapped so that `__rlcWatchOk()` (in `main-patch.js`) accepts 2 bots for 1v1 and 4 for 2v2, **for the mod's own 1v1/2v2 fixtures only**. 3v3 behaviour is unchanged.

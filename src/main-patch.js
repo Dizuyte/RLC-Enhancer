@@ -109,6 +109,13 @@
         if (s && state && engine.rlcBusiness) s.rlcBiz = engine.rlcBusiness.view(state);
       } catch (e) { console.error("[rlc-mod] business view", e); }
       try { if (s && state) s.rlcTitles = rlcTitleView(); } catch (e) { console.error("[rlc-mod] titles view", e); }
+      try {
+        if (s && state && engine.rlcStaff) {
+          s.rlcStaff = engine.rlcStaff.view(state);
+          s.rlcMediaClash = engine.rlcStaff.mediaClashes(state);
+          if (s.rlcStaff && s.scouting && typeof s.scouting === "object") s.scouting.slots = s.rlcStaff.hired;
+        }
+      } catch (e) { console.error("[rlc-mod] staff view", e); }
       return s;
     };
   } catch (err) { console.error("[rlc-mod] snapshot wrap", err); }
@@ -166,25 +173,26 @@ ipcMain.handle("rlc-bootcamp-answer", (_e, id, yes) => {
 });
 /* ===== RLC ENHANCER : titre in-game choisi pour chaque joueur du club ===== */
 function rlcTitleView() {
-  const team = engine.teamById(state, state.userTeamId);
-  if (!team) return null;
+  const team = engine.teamById(state, state.userTeamId) || { playerIds: [] };
   const picks = state.rlcTitlePicks || {};
   const out = {};
-  for (const id of team.playerIds || []) {
+  const ids = (team.playerIds || []).slice();
+  if (state.userPlayerId != null && !ids.includes(state.userPlayerId)) ids.push(state.userPlayerId);
+  for (const id of ids) {
     const p = engine.playerById(state, id);
-    if (!p || p.isUser) continue;
+    if (!p) continue;
     const list = titles.choices(p) || [];
     if (!list.length) continue;
     const auto = titles.chosen(Object.assign({}, p, { __rlcPick: null }));
-    out[id] = { pick: picks[id] || null, auto: auto ? auto.display || auto.text : null,
-      choices: list.map((x) => ({ key: x.key, display: x.display || x.text, year: x.year })) };
+    out[id] = { pick: picks[id] || null, auto: auto ? auto.display || auto.text : null, autoId: auto ? auto.id || "" : "",
+      choices: list.map((x) => ({ key: x.key, display: x.display || x.text, year: x.year, id: x.id || "" })) };
   }
   return out;
 }
 ipcMain.handle("rlc-title-pick", (_e, pid, key) => {
   if (!state) return snapshot();
   const p = engine.playerById(state, Number(pid));
-  if (p && p.teamId === state.userTeamId && !p.isUser) {
+  if (p && (p.teamId === state.userTeamId || p.isUser || p.id === state.userPlayerId)) {
     state.rlcTitlePicks = state.rlcTitlePicks || {};
     const ok = key && (titles.choices(p) || []).some((x) => x.key === key);
     if (ok) state.rlcTitlePicks[p.id] = key; else delete state.rlcTitlePicks[p.id];
@@ -202,3 +210,78 @@ ipcMain.handle("rlc-archive", (_e, q) => {
     return { seasons: engine.rlcArchive.seasons(state), season: engine.rlcArchive.season(state, q.season == null ? state.season : Number(q.season)) };
   } catch (err) { console.error("[rlc-mod] archive", err); return { error: String(err && err.message || err) }; }
 });
+
+/* ===== RLC ENHANCER : staff du club (coach d'entrainement, niveaux des scouts) ===== */
+ipcMain.handle("rlc-staff", (_e, act) => {
+  if (!state || !engine.rlcStaff) return snapshot();
+  act = act || {};
+  let r = { ok: false };
+  try {
+    if (act.kind === "coach") r = engine.rlcStaff.hireCoach(state, !!act.yes);
+    else if (act.kind === "scout") r = engine.rlcStaff.setScoutLevel(state, act.id, act.level);
+  } catch (err) { console.error("[rlc-mod] staff", err); r = { ok: false, error: String(err && err.message || err) }; }
+  if (r.ok) saveState();
+  return Object.assign({}, snapshot(), { rlc: r });
+});
+
+/* ===== RLC ENHANCER : plugin BakkesMod du mod =====
+   rlcbotcam : camera de pro pour les bots. La DLL est copiee dans BakkesMod et chargee
+   au lancement de Rocket League (cfg/plugins.cfg). */
+const __rlcPlugins = (function () {
+  function bmRoot() {
+    try { const d = typeof bmDir === "function" ? bmDir() : null; if (d && fs.existsSync(d)) return d; } catch (e) {}
+    return path.join(process.env.APPDATA || "", "bakkesmod", "bakkesmod");
+  }
+  function dll(name) {
+    const list = [];
+    try { list.push(path.join(process.resourcesPath, "rlc", name + ".dll")); } catch (e) {}
+    try { list.push(path.join(__dirname, "..", "rlc", name + ".dll")); } catch (e) {}
+    return list.find((f) => { try { return fs.existsSync(f); } catch (e) { return false; } }) || null;
+  }
+  function deploy(name) {
+    try {
+      const bm = bmRoot();
+      const src = dll(name);
+      if (!src || !fs.existsSync(bm)) return false;
+      const dst = path.join(bm, "plugins", name + ".dll");
+      let copy = true;
+      try { copy = !(fs.existsSync(dst) && fs.readFileSync(dst).equals(fs.readFileSync(src))); } catch (e) {}
+      if (copy) { try { fs.mkdirSync(path.dirname(dst), { recursive: true }); fs.copyFileSync(src, dst); } catch (e) { console.log("[rlc-mod] " + name + " not copied (Rocket League has it loaded): " + e.message); } }
+      if (!fs.existsSync(dst)) return false;
+      const cfg = path.join(bm, "cfg", "plugins.cfg");
+      if (fs.existsSync(cfg)) {
+        const txt = fs.readFileSync(cfg, "utf8");
+        if (!new RegExp("^\\s*plugin\\s+load\\s+" + name + "\\b", "im").test(txt)) {
+          fs.appendFileSync(cfg, (txt.endsWith("\n") || !txt ? "" : "\n") + "plugin load " + name + "\n", "utf8");
+        }
+      }
+      return true;
+    } catch (e) { console.log("[rlc-mod] " + name + ": " + e.message); return false; }
+  }
+  // la 1.3-dev chargeait aussi le plugin de nom de RL Career+ : on retire la ligne qu'elle avait ajoutee
+  function cleanupOld() {
+    try {
+      const cfg = path.join(bmRoot(), "cfg", "plugins.cfg");
+      if (!fs.existsSync(cfg)) return;
+      const txt = fs.readFileSync(cfg, "utf8");
+      const out = txt.replace(/^[ \t]*plugin[ \t]+load[ \t]+rlcareerplus[ \t]*\r?\n?/gim, "");
+      if (out !== txt) fs.writeFileSync(cfg, out, "utf8");
+    } catch (e) {}
+  }
+  try {
+    if (rcon && typeof rcon.send === "function" && !rcon.__rlcPlugins) {
+      rcon.__rlcPlugins = true;
+      const base = rcon.send.bind(rcon);
+      rcon.send = function (cmds, opts) {
+        try {
+          const arr = Array.isArray(cmds) ? cmds : [];
+          if (arr.some((c) => typeof c === "string" && c.indexOf("rlcareer_arm") === 0)) deploy("rlcbotcam");
+        } catch (e) { console.error("[rlc-mod] plugins", e); }
+        return base(cmds, opts);
+      };
+    }
+  } catch (e) { console.error("[rlc-mod] plugins hook", e); }
+  // au demarrage : le plugin est en place avant que Rocket League se lance
+  try { cleanupOld(); deploy("rlcbotcam"); } catch (e) {}
+  return { deploy };
+})();
